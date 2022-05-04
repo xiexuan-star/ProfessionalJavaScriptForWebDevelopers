@@ -40,4 +40,12 @@ type: 一般都为"text/javascript"
 
 ## 2.2 行内代码与外部文件
 
+建议将JavaScript代码放在外部文件中
 
+可缓存性, 可维护性, 适应未来
+
+## 2.3 文档模式
+
+## 2.4 \<noscript> 元素
+
+浏览器不支持script或者关闭了script时显示的内容
