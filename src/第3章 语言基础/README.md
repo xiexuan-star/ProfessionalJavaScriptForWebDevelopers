@@ -113,17 +113,17 @@ String.raw`first string\nsecond string`
 
 ### 3.4.7 Symbol类型
 
-创建Symbol
+1. 创建Symbol
 
 Symbol(description)
 
-全局符号注册表
+2. 全局符号注册表
 
 Symbol.for(description) 在全局符号注册表中搜索description, 如果有返回, 没有则创建后返回
 
 Symbol.keyFor(description) 通过symbol值查询全局注册表,获取其description｜undefined
 
-内置符号
+3. 内置符号
 
 Symbol.iterator
 
@@ -143,7 +143,9 @@ class Foo {
 }
 ```
 
-Symbol.isConcatSpreadable 一个布尔值, 表示对象是否应该使用Array.prototype.concat打平其数组元素
+Symbol.isConcatSpreadable
+
+一个布尔值, 表示对象是否应该使用Array.prototype.concat打平其数组元素
 
 当为true时, concat拼接时 arrayLike也会被打平, 如果不能被打平, 则忽略它
 
@@ -154,4 +156,133 @@ a.concat(b) // [1,{length:1,0:1}]
 b[Symbol.isConcatSpreadable] = true
 a.concat(b) // [1,1]
 ```
+
+Symbol.match
+
+```javascript
+
+class FooMatcher {
+  static [Symbol.match](target) {
+    return target.includes('foo');
+  }
+}
+
+// 调用FooMatcher的Symbol.match属性方法
+'foobar'.match(FooMatcher) // true
+
+// 所有正则表达式都默认实现了这个接口, 所以match方法可以接收所有正则表达式作为参数
+```
+
+Symbol.replace
+
+```javascript
+class FooReplacer {
+  static [Symbol.replace](target, replacement) {
+    return target.split('foo').join(replacement)
+  }
+}
+
+class StringReplacer {
+  constructor(str) {
+    this.str = str
+  }
+
+  [Symbol.replace](target, replacement) {
+    return target.split(this.str).join(replacement)
+  }
+}
+
+'1foo2'.replace(FooReplacer, 'bar') // 1bar2
+'1foo2'.replace(new StringReplacer('foo'), 'bar') // 1bar2
+```
+
+Symbol.search/split 类似与match与replace
+
+Symbol.species
+
+一个函数, 返回创建派生对象时的构造函数
+
+```javascript
+class Bar extends Array {}
+
+class Baz extends Array {
+  static get [Symbol.species]() {
+    return Array
+  }
+}
+
+let bar = new Bar()
+
+bar instanceof Bar // true
+bar instanceof Array // true
+bar = bar.concat('bar')
+bar instanceof Bar // true
+bar instanceof Array // true
+
+const baz = new Baz()
+baz instanceof Baz // true
+baz instanceof Array // true
+baz = baz.concat('baz')
+// concat创建了一个派生对象, 这个对象的构造函数是Array
+baz instanceof Baz // false 
+baz instanceof Array // true
+```
+
+Symbol.toPrimitive
+
+一个函数, 将对象转换为原始值时调用的方法, 由ToPrimitive抽象操作使用
+
+```javascript
+class Bar {
+  [Symbol.toPrimitive](hint) {
+    switch (hint) {
+      case 'number':
+        return 3
+      case 'string':
+        return 'string bar'
+      case 'default':
+        return 'default bar'
+    }
+  }
+}
+
+const bar = new Bar()
+// normal situation => bar's value
+3 + bar // 3[object Object] => 3default bar 
+3 - bar // NaN => 0 
+String(bar) // [object Object] => string bar
+```
+
+Symbol.toStringTag
+
+一个字符串, 用于创建对象的默认字符串描述, 由Object.prototype.toString 使用
+
+```javascript
+class Bar {
+  static [Symbol.toStringTag] = 'Bar'
+}
+
+new Bar().toString() // [object Bar]
+```
+
+Symbol.unscopables 与with有关
+
+### 3.4.8 Object类型
+
+constructor
+
+hasOwnProperty
+
+isPrototypeOf
+
+propertyIsEnumerable
+
+toLocaleString
+
+toString
+
+valueOf
+
+## 3.5 操作符
+
 
